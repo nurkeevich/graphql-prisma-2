@@ -1,38 +1,5 @@
 import { intArg, objectType, stringArg } from "@nexus/schema";
-
-export const Query = objectType({
-    name: "Query",
-    description: "Query operation",
-    definition(t) {
-        t.crud.post();
-
-        t.list.field("feed", {
-            type: "Post",
-            resolve: (_parent, _args, ctx) => {
-                return ctx.prisma.post.findMany({
-                    where: { published: true }
-                });
-            }
-        });
-
-        t.list.field("filterPosts", {
-            type: "Post",
-            args: {
-                searchString: stringArg({ nullable: true })
-            },
-            resolve: (_, { searchString }, ctx) => {
-                return ctx.prisma.post.findMany({
-                    where: {
-                        OR: [
-                            { title: { contains: searchString } },
-                            { content: { contains: searchString } }
-                        ]
-                    }
-                });
-            }
-        });
-    }
-});
+import { getUserId } from "../utils";
 
 export const Mutation = objectType({
     name: "Mutation",
@@ -71,6 +38,21 @@ export const Mutation = objectType({
                 return ctx.prisma.post.update({
                     where: { id: Number(id) },
                     data: { published: true }
+                });
+            }
+        });
+
+        t.field("delete_post", {
+            type: "Post",
+            description: "Delete the post",
+            args: {
+                post_id: intArg({ nullable: false })
+            },
+            resolve: async (parent, { post_id }, context) => {
+                return context.prisma.post.delete({
+                    where: {
+                        id: post_id
+                    }
                 });
             }
         });

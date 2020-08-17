@@ -4,6 +4,9 @@
 
 type Mutation {
   createDraft(authorEmail: String!, content: String, title: String!): Post!
+
+  """Delete the post"""
+  delete_post(post_id: Int!): Post!
   deleteOnePost(where: PostWhereUniqueInput!): Post
   publish(id: Int): Post
   signupUser(data: UserCreateInput!): User!
