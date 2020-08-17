@@ -1,9 +1,15 @@
 {
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-    "lib": ["esnext"],
-    "strict": true
-  },
-  "include": ["src/**/*"]
+    "compilerOptions": {
+        "outDir": "dist",
+        "rootDir": "src",
+        "lib": ["esnext"],
+        "strict": true,
+        "target": "es5",
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
+    },
+    "include": ["src/**/*"]
 }
