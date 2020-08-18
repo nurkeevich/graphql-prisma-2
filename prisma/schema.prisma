@@ -4,22 +4,22 @@ generator client {
 
 datasource postgresql {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:postgres@localhost:5432/db1?schema=public"
 }
 
 model Post {
-  id        Int     @default(autoincrement()) @id
   authorId  Int?
   content   String?
+  id        Int     @default(autoincrement()) @id
   published Boolean @default(false)
   title     String
-  user      User?   @relation(fields: [authorId], references: [id])
+  author    User?   @relation(fields: [authorId], references: [id])
 }
 
 model User {
-  id       Int     @default(autoincrement()) @id
   email    String  @unique
-  password String
+  id       Int     @default(autoincrement()) @id
   name     String?
+  password String
   posts    Post[]
 }
