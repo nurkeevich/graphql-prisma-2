@@ -1,4 +1,4 @@
 export * from "./Mutation";
-export * from "./Post";
+export * from "./objects/Post";
 export * from "./Query";
-export * from "./User";
+export * from "./objects/User";

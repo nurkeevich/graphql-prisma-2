@@ -1,11 +1,9 @@
 import { intArg, objectType, stringArg } from "@nexus/schema";
-import { getUserId } from "../utils";
 
 export const Mutation = objectType({
     name: "Mutation",
     definition(t) {
-        t.crud.createOneUser({ alias: "signupUser" });
-        t.crud.deleteOnePost();
+        // t.crud.createOneUser({ alias: "signupUser" });
 
         t.field("createDraft", {
             type: "Post",
@@ -14,7 +12,7 @@ export const Mutation = objectType({
                 content: stringArg(),
                 authorEmail: stringArg({ nullable: false })
             },
-            resolve: (_, { title, content, authorEmail }, { prisma }) => {
+            resolve: (_, { authorEmail, title, content }, { prisma }) => {
                 return prisma.post.create({
                     data: {
                         title,
@@ -42,16 +40,16 @@ export const Mutation = objectType({
             }
         });
 
-        t.field("delete_post", {
+        t.field("deletePost", {
             type: "Post",
             description: "Delete the post",
             args: {
-                post_id: intArg({ nullable: false })
+                postId: intArg({ nullable: false })
             },
-            resolve: async (parent, { post_id }, context) => {
+            resolve: async (parent, { postId }, context) => {
                 return context.prisma.post.delete({
                     where: {
-                        id: post_id
+                        id: postId
                     }
                 });
             }
