@@ -1,4 +1,4 @@
-import { intArg, objectType, stringArg } from "@nexus/schema";
+import { intArg, objectType, stringArg, booleanArg } from "@nexus/schema";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import { getUserId, APP_SECRET } from "../utils";
@@ -57,36 +57,76 @@ export const Mutation = objectType({
             }
         });
 
-        t.field("createDraft", {
+        t.field("createPost", {
             type: "Post",
             args: {
                 title: stringArg({ nullable: false }),
                 content: stringArg()
             },
-            resolve: async (_, { title, content }, { prisma }) => {
-                const result = await prisma.post.create({
+            resolve: async (_, { title, content }, { prisma, request }) => {
+                const userId = getUserId(request);
+                if (!userId) {
+                    throw new Error("Please login first");
+                }
+
+                const user = await prisma.user.findOne({
+                    where: { id: userId }
+                });
+                if (!user) {
+                    throw new Error("User does not exist!");
+                }
+
+                const newPost = await prisma.post.create({
                     data: {
                         title,
                         content,
-                        published: false
+                        published: false,
+                        author: {
+                            connect: {
+                                id: userId
+                            }
+                        }
                     }
                 });
 
-                return result;
+                return newPost;
             }
         });
 
-        t.field("publish", {
+        t.field("publishPost", {
             type: "Post",
-            nullable: true,
             args: {
-                id: intArg()
+                postId: intArg({ nullable: false })
             },
-            resolve: (_, { id }, ctx) => {
-                return ctx.prisma.post.update({
-                    where: { id: Number(id) },
-                    data: { published: true }
+            description: "Publish the draft",
+            resolve: async (parent, { postId }, { request, prisma }) => {
+                const userId = getUserId(request);
+                if (!userId) {
+                    throw new Error("Not authorized");
+                }
+
+                const postExist = await prisma.post.findMany({
+                    where: {
+                        id: postId,
+                        author: { id: userId }
+                    }
                 });
+                if (!postExist) {
+                    throw new Error(
+                        "Post does not exist or you are not the author"
+                    );
+                }
+
+                const publishedPost = await prisma.post.update({
+                    data: {
+                        published: true
+                    },
+                    where: {
+                        id: postId
+                    }
+                });
+
+                return publishedPost;
             }
         });
 

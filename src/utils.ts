@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
-import { Context } from "./context";
+import { Request } from "express";
 
 export const APP_SECRET = "appsecret321";
 
-export function getUserId(ctx: Context, requireAuth = true) {
-    const authorization = ctx.request.get("Authorization");
+export function getUserId(request: Request, requireAuth = true) {
+    const authorization = request.get("Authorization");
     if (authorization) {
         const token = authorization.replace("Bearer ", "");
         const { userId } = jwt.verify(token, APP_SECRET) as {
-            userId: string;
+            userId: number;
         };
 
         return userId;
