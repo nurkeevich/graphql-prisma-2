@@ -2,31 +2,29 @@
 ### Do not make changes to this file directly
 
 
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
 type Mutation {
   createDraft(content: String, title: String!): Post!
 
   """Delete the post"""
   deletePost(postId: Int!): Post!
   publish(id: Int): Post
-  signupUser(data: UserCreateInput!): User!
+
+  """Sign in user"""
+  signIn(email: String!, password: String!): AuthPayload!
+  signUp(email: String!, name: String!, password: String!): AuthPayload!
 }
 
 type Post {
+  author: User
   authorId: Int
   content: String
   id: Int!
   published: Boolean!
-  title: String!
-}
-
-input PostCreateManyWithoutUserInput {
-  connect: [PostWhereUniqueInput!]
-  create: [PostCreateWithoutUserInput!]
-}
-
-input PostCreateWithoutUserInput {
-  content: String
-  published: Boolean
   title: String!
 }
 
@@ -45,11 +43,5 @@ type User {
   email: String!
   id: Int!
   name: String
-}
-
-input UserCreateInput {
-  email: String!
-  name: String
-  password: String!
-  Post: PostCreateManyWithoutUserInput
+  posts: [Post!]!
 }
