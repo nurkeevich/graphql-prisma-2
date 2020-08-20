@@ -3,26 +3,24 @@ import { intArg, objectType, stringArg } from "@nexus/schema";
 export const Mutation = objectType({
     name: "Mutation",
     definition(t) {
-        // t.crud.createOneUser({ alias: "signupUser" });
+        t.crud.createOneUser({ alias: "signupUser" });
 
         t.field("createDraft", {
             type: "Post",
             args: {
                 title: stringArg({ nullable: false }),
-                content: stringArg(),
-                authorEmail: stringArg({ nullable: false })
+                content: stringArg()
             },
-            resolve: (_, { authorEmail, title, content }, { prisma }) => {
-                return prisma.post.create({
+            resolve: async (_, { title, content }, { prisma }) => {
+                const result = await prisma.post.create({
                     data: {
                         title,
                         content,
-                        published: false,
-                        author: {
-                            connect: { email: authorEmail }
-                        }
+                        published: false
                     }
                 });
+
+                return result
             }
         });
 
