@@ -13,6 +13,7 @@
     "@nexus/schema": "0.15.0",
     "@prisma/client": "2.4.1",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
     "express-session": "^1.17.1",
     "graphql": "15.3.0",
     "graphql-middleware": "^4.0.2",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@prisma/cli": "2.4.1",
     "@types/bcryptjs": "^2.4.2",
+    "@types/dotenv": "^8.2.0",
     "@types/express-session": "^1.17.0",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "12.12.54",

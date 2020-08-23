@@ -1,7 +1,10 @@
 import { intArg, objectType, stringArg, booleanArg, arg } from "@nexus/schema";
-import { getUserId, APP_SECRET } from "../utils";
+import { getUserId } from "../utils";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
+import * as dotenv from "dotenv";
+
+dotenv.config()
 
 export const Mutation = objectType({
     name: "Mutation",
@@ -28,7 +31,7 @@ export const Mutation = objectType({
                 }
 
                 return {
-                    token: jwt.sign({ userId: user.id }, APP_SECRET),
+                    token: jwt.sign({ userId: user.id }, process.env.APP_SECRET as string),
                     user
                 };
             }
@@ -61,7 +64,7 @@ export const Mutation = objectType({
                 });
 
                 return {
-                    token: jwt.sign({ userId: user.id }, APP_SECRET),
+                    token: jwt.sign({ userId: user.id }, process.env.APP_SECRET as string),
                     user
                 };
             }
