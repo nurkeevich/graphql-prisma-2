@@ -1,7 +1,7 @@
-import { intArg, objectType, stringArg, booleanArg } from "@nexus/schema";
+import { intArg, objectType, stringArg, booleanArg, arg } from "@nexus/schema";
+import { getUserId, APP_SECRET } from "../utils";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
-import { getUserId, APP_SECRET } from "../utils";
 
 export const Mutation = objectType({
     name: "Mutation",
@@ -42,6 +42,16 @@ export const Mutation = objectType({
                 name: stringArg({ nullable: false })
             },
             resolve: async (_, args, context) => {
+                const emailTaken = await context.prisma.user.findOne({
+                    where: {
+                        email: args.email
+                    }
+                });
+
+                if (emailTaken) {
+                    throw new Error(`${args.email}: already taken`);
+                }
+
                 const password = await bcrypt.hash(args.password, 10);
                 const user = await context.prisma.user.create({
                     data: {
@@ -59,37 +69,122 @@ export const Mutation = objectType({
 
         t.field("createPost", {
             type: "Post",
+            description: "Create a post",
             args: {
                 title: stringArg({ nullable: false }),
-                content: stringArg()
+                content: stringArg(),
+                published: booleanArg({ default: false })
             },
-            resolve: async (_, { title, content }, { prisma, request }) => {
+            resolve: async (
+                parent,
+                { title, content, published },
+                { prisma, request }
+            ) => {
                 const userId = getUserId(request);
-                if (!userId) {
-                    throw new Error("Please login first");
-                }
-
                 const user = await prisma.user.findOne({
-                    where: { id: userId }
+                    where: {
+                        id: userId || undefined
+                    }
                 });
+
                 if (!user) {
                     throw new Error("User does not exist!");
+                }
+
+                if (title === "") {
+                    throw new Error("Title need to be entered");
                 }
 
                 const newPost = await prisma.post.create({
                     data: {
                         title,
                         content,
-                        published: false,
+                        published: published as any,
                         author: {
                             connect: {
-                                id: userId
+                                id: userId || undefined
                             }
                         }
                     }
                 });
 
                 return newPost;
+            }
+        });
+
+        t.field("updatePost", {
+            type: "Post",
+            description: "Update the post",
+            args: {
+                postId: intArg({ nullable: false }),
+                title: stringArg(),
+                content: stringArg(),
+                published: booleanArg()
+            },
+            resolve: async (
+                parent,
+                { postId, content, title, published },
+                { prisma, request }
+            ) => {
+                const userId = getUserId(request);
+                const postExist = await prisma.post.findMany({
+                    where: {
+                        id: postId,
+                        authorId: userId
+                    }
+                });
+
+                if (postExist.length === 0) {
+                    throw new Error(
+                        "Post not found or your are not the author"
+                    );
+                }
+
+                const updatedPost = await prisma.post.update({
+                    where: {
+                        id: postId
+                    },
+                    data: {
+                        title: title as any,
+                        content,
+                        published: published as any
+                    }
+                });
+
+                return updatedPost;
+            }
+        });
+
+        t.field("deletePost", {
+            type: "Post",
+            description: "Delete the post",
+            args: {
+                postId: intArg({ nullable: false })
+            },
+            resolve: async (parent, { postId }, { prisma, request }) => {
+                const userId = getUserId(request);
+                console.log("userId: " + userId);
+
+                const post = await prisma.post.findMany({
+                    where: {
+                        id: postId,
+                        authorId: userId
+                    }
+                });
+
+                if (post.length === 0) {
+                    throw new Error(
+                        "Post does not exist or you are not author of the post"
+                    );
+                }
+
+                const deletedPost = await prisma.post.delete({
+                    where: {
+                        id: postId
+                    }
+                });
+
+                return deletedPost;
             }
         });
 
@@ -127,21 +222,6 @@ export const Mutation = objectType({
                 });
 
                 return publishedPost;
-            }
-        });
-
-        t.field("deletePost", {
-            type: "Post",
-            description: "Delete the post",
-            args: {
-                postId: intArg({ nullable: false })
-            },
-            resolve: async (parent, { postId }, context) => {
-                return context.prisma.post.delete({
-                    where: {
-                        id: postId
-                    }
-                });
             }
         });
     }

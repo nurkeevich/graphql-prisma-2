@@ -8,7 +8,8 @@ type AuthPayload {
 }
 
 type Mutation {
-  createPost(content: String, title: String!): Post!
+  """Create a post"""
+  createPost(content: String, published: Boolean = false, title: String!): Post!
 
   """Delete the post"""
   deletePost(postId: Int!): Post!
@@ -19,6 +20,9 @@ type Mutation {
   """Sign in user"""
   signIn(email: String!, password: String!): AuthPayload!
   signUp(email: String!, name: String!, password: String!): AuthPayload!
+
+  """Update the post"""
+  updatePost(content: String, postId: Int!, published: Boolean, title: String): Post!
 }
 
 type Post {
