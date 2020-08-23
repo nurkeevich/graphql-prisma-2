@@ -2,9 +2,7 @@ import { intArg, objectType, stringArg, booleanArg, arg } from "@nexus/schema";
 import { getUserId } from "../utils";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
-import * as dotenv from "dotenv";
 
-dotenv.config()
 
 export const Mutation = objectType({
     name: "Mutation",
@@ -133,7 +131,7 @@ export const Mutation = objectType({
                 const postExist = await prisma.post.findMany({
                     where: {
                         id: postId,
-                        authorId: userId
+                        authorId: userId || undefined
                     }
                 });
 
@@ -171,7 +169,7 @@ export const Mutation = objectType({
                 const post = await prisma.post.findMany({
                     where: {
                         id: postId,
-                        authorId: userId
+                        authorId: userId || undefined
                     }
                 });
 

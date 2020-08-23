@@ -1,8 +1,5 @@
 import jwt from "jsonwebtoken";
 import { Request } from "express";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 export function getUserId(request: Request, requireAuth = true) {
     const authorization = request.get("Authorization");

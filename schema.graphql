@@ -26,8 +26,8 @@ type Mutation {
 }
 
 type Post {
-  author: User
-  authorId: Int
+  author: User!
+  authorId: Int!
   content: String
   id: Int!
   published: Boolean!
