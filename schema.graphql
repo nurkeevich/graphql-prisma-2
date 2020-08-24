@@ -7,7 +7,18 @@ type AuthPayload {
   user: User!
 }
 
+type Comment {
+  author: User!
+  authorId: Int!
+  id: Int!
+  post: Post!
+  text: String!
+}
+
 type Mutation {
+  """create a comment"""
+  createComment(postId: Int!, text: String!): Comment!
+
   """Create a post"""
   createPost(content: String, published: Boolean = false, title: String!): Post!
 

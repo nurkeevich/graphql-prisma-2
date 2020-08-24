@@ -225,5 +225,38 @@ export const Mutation = objectType({
                 return publishedPost;
             }
         });
+
+        t.field("createComment", {
+            type: "Comment",
+            description: "create a comment",
+            args: {
+                postId: intArg({ nullable: false }),
+                text: stringArg({ nullable: false })
+            },
+            resolve: async (parent, { postId, text }, { prisma, request }) => {
+                const userId = getUserId(request);
+
+                const post = await prisma.post.findMany({
+                    where: {
+                        id: postId,
+                        published: true
+                    }
+                });
+
+                if (post.length === 0) {
+                    throw new Error("Post does not exist");
+                }
+
+                const newComment = await prisma.comment.create({
+                    data: {
+                        author: { connect: { id: userId as any } },
+                        post: { connect: { id: postId } },
+                        text
+                    }
+                });
+
+                return newComment;
+            }
+        });
     }
 });
